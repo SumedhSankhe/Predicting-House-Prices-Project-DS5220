@@ -1,11 +1,20 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(readr)
 
 test <- read_csv("test.csv")
 
 summary(test)
+```
 
 
+```{r Counting Missing values and Visualizing}
 na_count <- sapply(test, function(x) sum(length(which(is.na(x)))))
 
 na_df <- data.frame(keyName = names(na_count),
@@ -24,9 +33,12 @@ na_df%>%
        title = "Visualizing Missing Value Count")+
   geom_bar(stat = "identity")+
   coord_flip()
+```
 
-#Thus we see that there are a fairly large number of missing values in the dataset, almost equivalent to the number of observations in the dataset. 
-# On closer observation of the dataset and it was observed that features that were not included in the house were listed as NA hence these features will be handled by replacing them with "None".
+Thus we see that there are a fairly large number of missing values in the dataset, almost equivalent to the number of observations in the dataset.   
+On closer observation of the dataset and it was observed that features that were not included in the house were listed as NA hence these features will be handled by replacing them with "None".  
+
+```{r Imputing categorical features}
 
 unique(test$PoolQC)
 test$PoolQC[is.na(test$PoolQC)] <- "None"
@@ -74,7 +86,11 @@ test$BsmtFinType2[is.na(test$BsmtFinType2)] <- "None"
 unique(test$MasVnrType)
 test$MasVnrType[is.na(test$MasVnrType)] <- "None"
 
+```
 
+
+Lot frontage is the linear feet of street connected to the property, if NA it is subsituted by the mean of the lot frontage for that particular neighborhood. Similarly the year in which garage was built, has NA's those values were substituted with median year the garages where built for that particular neighborhood. 
+```{r Imputing continuous features}
 impute.mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
 impute.median <- function(x) replace(x,is.na(x), median(x,na.rm = TRUE))
 
@@ -85,21 +101,11 @@ test%>%
 test%>%
   group_by(Neighborhood)%>%
   mutate(GarageYrBlt = impute.median(GarageYrBlt))->test
+```
 
 
 
 
-test%>%
-  group_by(Neighborhood,MSZoning)%>%
-  summarise (n = n()) %>%
-  mutate(freq = n / sum(n))%>%
-  ggplot(aes(x = Neighborhood,
-             y = freq,
-             fill = freq))+
-  geom_bar(stat = "identity")+
-  labs(y = "Freq",
-       title = "Zoning of the neighborhoods")+
-  coord_flip()+
-  facet_wrap(~MSZoning)
+
 
 
