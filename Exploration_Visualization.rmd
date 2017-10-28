@@ -101,6 +101,12 @@ test%>%
 test%>%
   group_by(Neighborhood)%>%
   mutate(GarageYrBlt = impute.median(GarageYrBlt))->test
+
+test%>%
+  group_by(Neighborhood)%>%
+  mutate(MasVnrArea = impute.median(MasVnrArea))->test
+
+
 ```
 
 
