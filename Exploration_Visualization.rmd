@@ -10,7 +10,7 @@ library(readr)
 
 test <- read_csv("test.csv")
 
-summary(test)
+# summary(test)
 ```
 
 
@@ -40,52 +40,126 @@ On closer observation of the dataset and it was observed that features that were
 
 ```{r Imputing categorical features}
 
-unique(test$PoolQC)
-test$PoolQC[is.na(test$PoolQC)] <- "None"
+test$PoolQC[is.na(test$PoolQC)] <- "NoPool"
+test$PoolQC <- factor(test$PoolQC)
+t1 <- data.frame(model.matrix(~test$PoolQC-1, data = test))
+names(t1) = levels(test$PoolQC)
 
-unique(test$MiscFeature)
-test$MiscFeature[is.na(test$MiscFeature)] <- "None"
-
-unique(test$Alley)
-test$Alley[is.na(test$Alley)] <- "None"
-
-unique(test$Fence)
-test$Fence[is.na(test$Fence)] <- "None"
-
-unique(test$FireplaceQu)
-test$FireplaceQu[is.na(test$FireplaceQu)] <- "None"
+test$MiscFeature[is.na(test$MiscFeature)] <- "NoMisc"
+test$MiscFeature <- factor(test$MiscFeature)
+t2 <- data.frame(model.matrix(~test$MiscFeature-1, data = test))
+names(t2) = levels(test$MiscFeature)
 
 
-unique(test$GarageQual)
+test$Alley[is.na(test$Alley)] <- "NoAlley"
+test$Alley <- factor(test$Alley)
+t3 <- data.frame(model.matrix(~test$Alley-1, data = test))
+names(t3) = levels(test$Alley)
+
+
+test$Fence[is.na(test$Fence)] <- "NoFence"
+test$Fence <- factor(test$Fence)
+t4 <- data.frame(model.matrix(~test$Fence-1, data = test))
+names(t4) = levels(test$Fence)
+
+
+test$FireplaceQu[is.na(test$FireplaceQu)] <- "NoFireplace"
+test$FireplaceQu <- factor(test$FireplaceQu)
+t5 <- data.frame(model.matrix(~test$FireplaceQu-1, data = test))
+names(t5) = levels(test$FireplaceQu)
+
+
 test$GarageQual[is.na(test$GarageQual)] <- "None"
+test$GarageQual <- factor(test$GarageQual)
+t6 <- data.frame(model.matrix(~test$GarageQual-1, data = test))
+names(t6) = levels(test$GarageQual)
 
-unique(test$GarageType)
-test$GarageType[is.na(test$GarageType)] <- "None"
 
-unique(test$GarageFinish)
-test$GarageFinish[is.na(test$GarageFinish)] <- "None"
+test$GarageType[is.na(test$GarageType)] <- "NoGarag"
+test$GarageType <- factor(test$GarageType)
+t7 <- data.frame(model.matrix(~test$GarageType-1, data = test))
+names(t7) = levels(test$GarageType)
 
-unique(test$GarageCond)
-test$GarageCond[is.na(test$GarageCond)] <- "None"
+test$GarageFinish[is.na(test$GarageFinish)] <- "NoGarage"
+test$GarageFinish <- factor(test$GarageFinish)
+t8 <- data.frame(model.matrix(~test$GarageFinish-1, data = test))
+names(t8) = levels(test$GarageFinish)
 
-unique(test$BsmtCond)
-test$BsmtCond[is.na(test$BsmtCond)] <- "None"
+test$GarageCond[is.na(test$GarageCond)] <- "NoGar"
+test$GarageCond <- factor(test$GarageCond)
+t9 <- data.frame(model.matrix(~test$GarageCond-1, data = test))
+names(t9) = levels(test$GarageCond)
 
-unique(test$BsmtQual)
-test$BsmtQual[is.na(test$BsmtQual)] <- "None"
+test$BsmtCond[is.na(test$BsmtCond)] <- "NoBsmt"
+test$BsmtCond <- factor(test$BsmtCond)
+t10 <- data.frame(model.matrix(~test$BsmtCond-1, data = test))
+names(t10) = levels(test$BsmtCond)
 
-unique(test$BsmtExposure)
-test$BsmtExposure[is.na(test$BsmtExposure)] <- "None"
+test$BsmtQual[is.na(test$BsmtQual)] <- "NoBasmt"
+test$BsmtQual <- factor(test$BsmtQual)
+t11 <- data.frame(model.matrix(~test$BsmtQual-1, data = test))
+names(t11) = levels(test$BsmtQual)
 
-unique(test$BsmtFinType1)
-test$BsmtFinType1[is.na(test$BsmtFinType1)] <- "None"
+test$BsmtExposure[is.na(test$BsmtExposure)] <- "NoBsmnt"
+test$BsmtExposure <- factor(test$BsmtExposure)
+t12 <- data.frame(model.matrix(~test$BsmtExposure-1, data = test))
+names(t12) = levels(test$BsmtExposure)
 
-unique(test$BsmtFinType2)
-test$BsmtFinType2[is.na(test$BsmtFinType2)] <- "None"
+test$BsmtFinType1[is.na(test$BsmtFinType1)] <- "NoBsment"
+test$BsmtFinType1 <- factor(test$BsmtFinType1)
+t13 <- data.frame(model.matrix(~test$BsmtFinType1-1, data = test))
+names(t13) = levels(test$BsmtFinType1)
 
-unique(test$MasVnrType)
-test$MasVnrType[is.na(test$MasVnrType)] <- "None"
+test$BsmtFinType2[is.na(test$BsmtFinType2)] <- "NoBasmnt"
+test$BsmtFinType2 <- factor(test$BsmtFinType2)
+t14 <- data.frame(model.matrix(~test$BsmtFinType2-1, data = test))
+names(t14) = levels(test$BsmtFinType2)
 
+test$MasVnrType[is.na(test$MasVnrType)] <- "NoVnr"
+test$MasVnrType <- factor(test$MasVnrType)
+t15 <- data.frame(model.matrix(~test$MasVnrType-1, data = test))
+names(t15) = levels(test$MasVnrType)
+
+test$Street <- factor(test$Street)
+t16 <- data.frame(model.matrix(~test$Street-1, data = test))
+names(t16) = levels(test$Street)
+
+
+test$LotShape <- factor(test$LotShape)
+t17 <- data.frame(model.matrix(~test$LotShape-1, data = test))
+names(t17) = levels(test$LotShape)
+
+test$LandContour <- factor(test$LandContour)
+t18 <- data.frame(model.matrix(~test$LandContour-1, data = test))
+names(t18) = levels(test$LandContour)
+
+test$LotConfig <- factor(test$LotConfig)
+t19 <- data.frame(model.matrix(~test$LotConfig-1, data = test))
+names(t19) = levels(test$LotConfig)
+
+test%>%
+  select(-c(PoolQC,
+            MiscFeature,
+            Alley,
+            Fence,
+            FireplaceQu,
+            GarageQual,
+            GarageType,
+            GarageCond,
+            GarageFinish,
+            BsmtCond,
+            BsmtQual,
+            BsmtExposure,
+            BsmtFinType2,
+            BsmtFinType1,
+            MasVnrType,
+            Street,
+            LotShape,
+            LandContour,
+            LotConfig))%>%
+  bind_cols(c(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19))->test
+
+rm(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19)
 ```
 
 
@@ -105,12 +179,18 @@ test%>%
 test%>%
   group_by(Neighborhood)%>%
   mutate(MasVnrArea = impute.median(MasVnrArea))->test
-
-
 ```
 
 
+```{r}
 
+t <- data.frame(model.matrix(~test$PoolQC-1, data = test))
+names(t) = levels(test$PoolQC)
+dfcat = data.frame(model.matrix(~ df$Breed-1, data=df))
+names(dfcat) = levels(df$Breed)
+
+
+```
 
 
 
