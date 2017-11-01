@@ -39,33 +39,9 @@ na_df%>%
 Thus we see that there are a fairly large number of missing values in the dataset, almost equivalent to the number of observations in the dataset.   
 On closer observation of the dataset and it was observed that features that were not included in the house were listed as NA hence these features will be handled by replacing them with "None".  
 
-```{r Imputing categorical features}
+```{r}
 new_DF <- test[rowSums(is.na(test)) >0,]
 
-test$PoolQC[is.na(test$PoolQC)] <- "None"
-test$MiscFeature[is.na(test$MiscFeature)] <- "None"
-test$Alley[is.na(test$Alley)] <- "None"
-test$Fence[is.na(test$Fence)] <- "None"
-test$FireplaceQu[is.na(test$FireplaceQu)] <- "NoFireplace"
-test$GarageQual[is.na(test$GarageQual)] <- "None"
-test$GarageType[is.na(test$GarageType)] <- "None"
-test$GarageFinish[is.na(test$GarageFinish)] <- "None"
-test$GarageCond[is.na(test$GarageCond)] <- "None"
-test$BsmtCond[is.na(test$BsmtCond)] <- "None"
-test$BsmtQual[is.na(test$BsmtQual)] <- "None"
-test$BsmtExposure[is.na(test$BsmtExposure)] <- "None"
-test$BsmtFinType1[is.na(test$BsmtFinType1)] <- "None"
-test$BsmtFinType2[is.na(test$BsmtFinType2)] <- "None"
-test$MasVnrType[is.na(test$MasVnrType)] <- "None"
-test$BsmtFullBath[is.na(test$BsmtFullBath)] <- "None"
-test$BsmtHalfBath[is.na(test$BsmtHalfBath)] <- "None"
-test$TotalBsmtSF[is.na(test$TotalBsmtSF)] <- 0
-test$BsmtFinSF1[is.na(test$BsmtFinSF1)] <- 0
-test$BsmtFinSF2[is.na(test$BsmtFinSF2)] <- 0
-test$BsmtUnfSF[is.na(test$BsmtUnfSF)] <- 0
-```
-
-```{r}
 test%>%
   filter(Neighborhood == "IDOTRR")%>%
   group_by(Functional)%>%
@@ -75,10 +51,8 @@ test%>%
   geom_bar(stat = "identity")
 
 test$Functional[is.na(test$Functional)] <- "Typ"
-```
 
 
-```{r}
 test%>%
   filter(is.na(Exterior1st))%>%
   group_by(Neighborhood)%>%
@@ -119,6 +93,32 @@ test$Exterior2nd[is.na(test$Exterior2nd)] <- "Wd Sdng"
 ```
 
 
+```{r}
+ndf <- function(x){
+  mydf = data.frame()
+  y <- sapply(x,is.character)
+  y1 <- x[,y]
+  y2 <- x[,!y]
+  y1 <- replace(y1,is.na(y1),"No")
+  # y1 <- replace(y1, ,"No")
+  mydf <- cbind(y1,y2)
+  return(mydf)
+}
+
+test <- ndf(test)
+
+
+
+test$TotalBsmtSF[is.na(test$TotalBsmtSF)] <- 0
+test$BsmtFinSF1[is.na(test$BsmtFinSF1)] <- 0
+test$BsmtFinSF2[is.na(test$BsmtFinSF2)] <- 0
+test$BsmtUnfSF[is.na(test$BsmtUnfSF)] <- 0
+test$BsmtFullBath[is.na(test$BsmtFullBath)] <- 0
+test$BsmtHalfBath[is.na(test$BsmtHalfBath)] <- 0
+```
+
+
+
 
 Lot frontage is the linear feet of street connected to the property, if NA it is subsituted by the mean of the lot frontage for that particular neighborhood. Similarly the year in which garage was built, has NA's those values were substituted with median year the garages where built for that particular neighborhood. 
 ```{r Imputing continuous features}
@@ -154,18 +154,6 @@ test%>%
   mutate(GarageYrBlt = impute.median(GarageYrBlt))->test
 
 test%>%
-  filter(is.na(MasVnrArea))%>%
-  group_by(Neighborhood)%>%
-  count()%>%
-  ggplot(aes(x = Neighborhood,
-             y = n))+
-  geom_bar(stat = "identity")+
-  labs(y = "Count of NA",
-       title = "NA vs Neighborhoods for MasVnrArea")+
-  coord_flip()
-
- 
-test%>%
   group_by(Neighborhood)%>%
   mutate(MasVnrArea = impute.median(MasVnrArea))->test
 
@@ -179,19 +167,14 @@ test%>%
   mutate(GarageArea = impute.median(GarageArea))->test
 
 test%>%
-  filter(!is.na(GarageCars))%>%
   group_by(Neighborhood)%>%
-  summarise(mcar = median(GarageCars))
-
-test%>%
-  filter(is.na(GarageCars))%>%
-  group_by(Neighborhood)%>%
-  summarise(mcar = median(GarageCars))
+  mutate(GarageCars = impute.median(GarageCars))->test
 ```
 
 
 ```{r}
-
+test%>%
+  filter(BsmtCond == "No")
 test1 <- as.data.frame(unclass(test))
 
 x1 <- model.matrix(~PoolQC+
