@@ -5,6 +5,7 @@ output:
 ---
 
 ```{r, message=FALSE, warning=FALSE}
+library(knitr)
 library(tidyverse)
 library(readr)
 
@@ -39,128 +40,84 @@ Thus we see that there are a fairly large number of missing values in the datase
 On closer observation of the dataset and it was observed that features that were not included in the house were listed as NA hence these features will be handled by replacing them with "None".  
 
 ```{r Imputing categorical features}
+new_DF <- test[rowSums(is.na(test)) >0,]
 
-test$PoolQC[is.na(test$PoolQC)] <- "NoPool"
-test$PoolQC <- factor(test$PoolQC)
-t1 <- data.frame(model.matrix(~test$PoolQC-1, data = test))
-names(t1) = levels(test$PoolQC)
-
-test$MiscFeature[is.na(test$MiscFeature)] <- "NoMisc"
-test$MiscFeature <- factor(test$MiscFeature)
-t2 <- data.frame(model.matrix(~test$MiscFeature-1, data = test))
-names(t2) = levels(test$MiscFeature)
-
-
-test$Alley[is.na(test$Alley)] <- "NoAlley"
-test$Alley <- factor(test$Alley)
-t3 <- data.frame(model.matrix(~test$Alley-1, data = test))
-names(t3) = levels(test$Alley)
-
-
-test$Fence[is.na(test$Fence)] <- "NoFence"
-test$Fence <- factor(test$Fence)
-t4 <- data.frame(model.matrix(~test$Fence-1, data = test))
-names(t4) = levels(test$Fence)
-
-
+test$PoolQC[is.na(test$PoolQC)] <- "None"
+test$MiscFeature[is.na(test$MiscFeature)] <- "None"
+test$Alley[is.na(test$Alley)] <- "None"
+test$Fence[is.na(test$Fence)] <- "None"
 test$FireplaceQu[is.na(test$FireplaceQu)] <- "NoFireplace"
-test$FireplaceQu <- factor(test$FireplaceQu)
-t5 <- data.frame(model.matrix(~test$FireplaceQu-1, data = test))
-names(t5) = levels(test$FireplaceQu)
-
-
 test$GarageQual[is.na(test$GarageQual)] <- "None"
-test$GarageQual <- factor(test$GarageQual)
-t6 <- data.frame(model.matrix(~test$GarageQual-1, data = test))
-names(t6) = levels(test$GarageQual)
+test$GarageType[is.na(test$GarageType)] <- "None"
+test$GarageFinish[is.na(test$GarageFinish)] <- "None"
+test$GarageCond[is.na(test$GarageCond)] <- "None"
+test$BsmtCond[is.na(test$BsmtCond)] <- "None"
+test$BsmtQual[is.na(test$BsmtQual)] <- "None"
+test$BsmtExposure[is.na(test$BsmtExposure)] <- "None"
+test$BsmtFinType1[is.na(test$BsmtFinType1)] <- "None"
+test$BsmtFinType2[is.na(test$BsmtFinType2)] <- "None"
+test$MasVnrType[is.na(test$MasVnrType)] <- "None"
+test$BsmtFullBath[is.na(test$BsmtFullBath)] <- "None"
+test$BsmtHalfBath[is.na(test$BsmtHalfBath)] <- "None"
+test$TotalBsmtSF[is.na(test$TotalBsmtSF)] <- 0
+test$BsmtFinSF1[is.na(test$BsmtFinSF1)] <- 0
+test$BsmtFinSF2[is.na(test$BsmtFinSF2)] <- 0
+test$BsmtUnfSF[is.na(test$BsmtUnfSF)] <- 0
+```
+
+```{r}
+test%>%
+  filter(Neighborhood == "IDOTRR")%>%
+  group_by(Functional)%>%
+  count()%>%
+  ggplot(aes(x=Functional,
+             y = n))+
+  geom_bar(stat = "identity")
+
+test$Functional[is.na(test$Functional)] <- "Typ"
+```
 
 
-test$GarageType[is.na(test$GarageType)] <- "NoGarag"
-test$GarageType <- factor(test$GarageType)
-t7 <- data.frame(model.matrix(~test$GarageType-1, data = test))
-names(t7) = levels(test$GarageType)
+```{r}
+test%>%
+  filter(is.na(Exterior1st))%>%
+  group_by(Neighborhood)%>%
+  count()
+  
+test%>%
+  filter(Neighborhood == "Edwards")%>%
+  group_by(Exterior1st)%>%
+  count()%>%
+  ggplot(aes(x = reorder(Exterior1st,n),
+             y = n))+
+  geom_bar(stat = "identity",
+           position = "dodge")+
+  labs(x = "Exterior 1st",
+       y = "Count")+
+  coord_flip()
 
-test$GarageFinish[is.na(test$GarageFinish)] <- "NoGarage"
-test$GarageFinish <- factor(test$GarageFinish)
-t8 <- data.frame(model.matrix(~test$GarageFinish-1, data = test))
-names(t8) = levels(test$GarageFinish)
-
-test$GarageCond[is.na(test$GarageCond)] <- "NoGar"
-test$GarageCond <- factor(test$GarageCond)
-t9 <- data.frame(model.matrix(~test$GarageCond-1, data = test))
-names(t9) = levels(test$GarageCond)
-
-test$BsmtCond[is.na(test$BsmtCond)] <- "NoBsmt"
-test$BsmtCond <- factor(test$BsmtCond)
-t10 <- data.frame(model.matrix(~test$BsmtCond-1, data = test))
-names(t10) = levels(test$BsmtCond)
-
-test$BsmtQual[is.na(test$BsmtQual)] <- "NoBasmt"
-test$BsmtQual <- factor(test$BsmtQual)
-t11 <- data.frame(model.matrix(~test$BsmtQual-1, data = test))
-names(t11) = levels(test$BsmtQual)
-
-test$BsmtExposure[is.na(test$BsmtExposure)] <- "NoBsmnt"
-test$BsmtExposure <- factor(test$BsmtExposure)
-t12 <- data.frame(model.matrix(~test$BsmtExposure-1, data = test))
-names(t12) = levels(test$BsmtExposure)
-
-test$BsmtFinType1[is.na(test$BsmtFinType1)] <- "NoBsment"
-test$BsmtFinType1 <- factor(test$BsmtFinType1)
-t13 <- data.frame(model.matrix(~test$BsmtFinType1-1, data = test))
-names(t13) = levels(test$BsmtFinType1)
-
-test$BsmtFinType2[is.na(test$BsmtFinType2)] <- "NoBasmnt"
-test$BsmtFinType2 <- factor(test$BsmtFinType2)
-t14 <- data.frame(model.matrix(~test$BsmtFinType2-1, data = test))
-names(t14) = levels(test$BsmtFinType2)
-
-test$MasVnrType[is.na(test$MasVnrType)] <- "NoVnr"
-test$MasVnrType <- factor(test$MasVnrType)
-t15 <- data.frame(model.matrix(~test$MasVnrType-1, data = test))
-names(t15) = levels(test$MasVnrType)
-
-test$Street <- factor(test$Street)
-t16 <- data.frame(model.matrix(~test$Street-1, data = test))
-names(t16) = levels(test$Street)
-
-
-test$LotShape <- factor(test$LotShape)
-t17 <- data.frame(model.matrix(~test$LotShape-1, data = test))
-names(t17) = levels(test$LotShape)
-
-test$LandContour <- factor(test$LandContour)
-t18 <- data.frame(model.matrix(~test$LandContour-1, data = test))
-names(t18) = levels(test$LandContour)
-
-test$LotConfig <- factor(test$LotConfig)
-t19 <- data.frame(model.matrix(~test$LotConfig-1, data = test))
-names(t19) = levels(test$LotConfig)
+test$Exterior1st[is.na(test$Exterior1st)] <- "Wd Sdng"
 
 test%>%
-  select(-c(PoolQC,
-            MiscFeature,
-            Alley,
-            Fence,
-            FireplaceQu,
-            GarageQual,
-            GarageType,
-            GarageCond,
-            GarageFinish,
-            BsmtCond,
-            BsmtQual,
-            BsmtExposure,
-            BsmtFinType2,
-            BsmtFinType1,
-            MasVnrType,
-            Street,
-            LotShape,
-            LandContour,
-            LotConfig))%>%
-  bind_cols(c(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19))->test
+  filter(is.na(Exterior2nd))%>%
+  group_by(Neighborhood)%>%
+  count()
 
-rm(t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19)
+test%>%
+  filter(Neighborhood == "Edwards")%>%
+  group_by(Exterior2nd)%>%
+  count()%>%
+  ggplot(aes(x = reorder(Exterior2nd,n),
+             y = n))+
+  geom_bar(stat = "identity",
+           position = "dodge")+
+  labs(x = "Exterior 1st",
+       y = "Count")+
+  coord_flip()
+
+test$Exterior2nd[is.na(test$Exterior2nd)] <- "Wd Sdng"
 ```
+
 
 
 Lot frontage is the linear feet of street connected to the property, if NA it is subsituted by the mean of the lot frontage for that particular neighborhood. Similarly the year in which garage was built, has NA's those values were substituted with median year the garages where built for that particular neighborhood. 
@@ -169,26 +126,118 @@ impute.mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
 impute.median <- function(x) replace(x,is.na(x), median(x,na.rm = TRUE))
 
 test%>%
+  filter(is.na(LotFrontage))%>%
+  group_by(Neighborhood)%>%
+  count()%>%
+  ggplot(aes(x = Neighborhood,
+             y = n))+
+  geom_bar(stat = "identity")+
+  coord_flip()
+
+test%>%
   group_by(Neighborhood)%>%
   mutate(LotFrontage = impute.mean(LotFrontage))->test
+
+test%>%
+  filter(is.na(GarageYrBlt))%>%
+  group_by(Neighborhood)%>%
+  count()%>%
+  ggplot(aes(x = Neighborhood,
+             y = n))+
+  geom_bar(stat = "identity")+
+  labs(x = "Count of NA",
+       title = "NA vs Neighborhoods for GarageYrBlt")+
+  coord_flip()
 
 test%>%
   group_by(Neighborhood)%>%
   mutate(GarageYrBlt = impute.median(GarageYrBlt))->test
 
 test%>%
+  filter(is.na(MasVnrArea))%>%
+  group_by(Neighborhood)%>%
+  count()%>%
+  ggplot(aes(x = Neighborhood,
+             y = n))+
+  geom_bar(stat = "identity")+
+  labs(y = "Count of NA",
+       title = "NA vs Neighborhoods for MasVnrArea")+
+  coord_flip()
+
+ 
+test%>%
   group_by(Neighborhood)%>%
   mutate(MasVnrArea = impute.median(MasVnrArea))->test
+
+test%>%
+  filter(is.na(GarageArea))%>%
+  group_by(Neighborhood)%>%
+  count()
+
+test%>%
+  group_by(Neighborhood)%>%
+  mutate(GarageArea = impute.median(GarageArea))->test
+
+test%>%
+  filter(!is.na(GarageCars))%>%
+  group_by(Neighborhood)%>%
+  summarise(mcar = median(GarageCars))
+
+test%>%
+  filter(is.na(GarageCars))%>%
+  group_by(Neighborhood)%>%
+  summarise(mcar = median(GarageCars))
 ```
 
 
 ```{r}
 
-t <- data.frame(model.matrix(~test$PoolQC-1, data = test))
-names(t) = levels(test$PoolQC)
-dfcat = data.frame(model.matrix(~ df$Breed-1, data=df))
-names(dfcat) = levels(df$Breed)
+test1 <- as.data.frame(unclass(test))
 
+x1 <- model.matrix(~PoolQC+
+                     MiscFeature+
+                     Alley+
+                     Fence+
+                     FireplaceQu+
+                     GarageQual+
+                     GarageType+
+                     GarageCond+
+                     GarageFinish+
+                     BsmtCond+
+                     BsmtQual+
+                     BsmtExposure+
+                     BsmtFinType2+
+                     BsmtFinType1+
+                     MasVnrType+
+                     Street+
+                     LotShape+
+                     LandContour+
+                     LotConfig+
+                     SaleCondition+
+                     SaleType+
+                     PavedDrive+
+                     Functional+
+                     KitchenQual+
+                     Electrical+
+                     CentralAir+
+                     HeatingQC+
+                     Heating+
+                     Foundation+
+                     ExterCond+
+                     ExterQual+
+                     MasVnrType+
+                     Exterior2nd+
+                     Exterior1st+
+                     RoofMatl+
+                     RoofStyle+
+                     HouseStyle+
+                     BldgType+
+                     Condition2+
+                     Condition1+
+                     Neighborhood+
+                     LandSlope+
+                     Utilities+
+                     MSZoning,test1)
 
 ```
 
