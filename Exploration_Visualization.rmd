@@ -177,50 +177,50 @@ test%>%
 #   filter(BsmtCond == "No")
 # test1 <- as.data.frame(unclass(test))
 
-# x1 <- model.matrix(~PoolQC+
-#                      MiscFeature+
-#                      Alley+
-#                      Fence+
-#                      FireplaceQu+
-#                      GarageQual+
-#                      GarageType+
-#                      GarageCond+
-#                      GarageFinish+
-#                      BsmtCond+
-#                      BsmtQual+
-#                      BsmtExposure+
-#                      BsmtFinType2+
-#                      BsmtFinType1+
-#                      MasVnrType+
-#                      Street+
-#                      LotShape+
-#                      LandContour+
-#                      LotConfig+
-#                      SaleCondition+
-#                      SaleType+
-#                      PavedDrive+
-#                      Functional+
-#                      KitchenQual+
-#                      Electrical+
-#                      CentralAir+
-#                      HeatingQC+
-#                      Heating+
-#                      Foundation+
-#                      ExterCond+
-#                      ExterQual+
-#                      MasVnrType+
-#                      Exterior2nd+
-#                      Exterior1st+
-#                      RoofMatl+
-#                      RoofStyle+
-#                      HouseStyle+
-#                      BldgType+
-#                      Condition2+
-#                      Condition1+
-#                      Neighborhood+
-#                      LandSlope+
-#                      Utilities+
-#                      MSZoning,test1)
+x1 <- data.frame(model.matrix(~PoolQC+
+                     MiscFeature+
+                     Alley+
+                     Fence+
+                     FireplaceQu+
+                     GarageQual+
+                     GarageType+
+                     GarageCond+
+                     GarageFinish+
+                     BsmtCond+
+                     BsmtQual+
+                     BsmtExposure+
+                     BsmtFinType2+
+                     BsmtFinType1+
+                     MasVnrType+
+                     Street+
+                     LotShape+
+                     LandContour+
+                     LotConfig+
+                     SaleCondition+
+                     SaleType+
+                     PavedDrive+
+                     Functional+
+                     KitchenQual+
+                     Electrical+
+                     CentralAir+
+                     HeatingQC+
+                     Heating+
+                     Foundation+
+                     ExterCond+
+                     ExterQual+
+                     MasVnrType+
+                     Exterior2nd+
+                     Exterior1st+
+                     RoofMatl+
+                     RoofStyle+
+                     HouseStyle+
+                     BldgType+
+                     Condition2+
+                     Condition1+
+                     Neighborhood+
+                     LandSlope+
+                     Utilities+
+                     MSZoning,test))
 
 ```
 
