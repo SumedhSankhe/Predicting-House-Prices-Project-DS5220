@@ -1,9 +1,11 @@
+library(knitr)
 library(tidyverse)
 library(readr)
 
 test <- read_csv("test.csv")
 
-summary(test)
+# summary(test)
+
 
 
 na_count <- sapply(test, function(x) sum(length(which(is.na(x)))))
@@ -25,81 +27,184 @@ na_df%>%
   geom_bar(stat = "identity")+
   coord_flip()
 
-#Thus we see that there are a fairly large number of missing values in the dataset, almost equivalent to the number of observations in the dataset. 
-# On closer observation of the dataset and it was observed that features that were not included in the house were listed as NA hence these features will be handled by replacing them with "None".
 
-unique(test$PoolQC)
-test$PoolQC[is.na(test$PoolQC)] <- "None"
+# Thus we see that there are a fairly large number of missing values in the dataset, almost equivalent to the number of observations in the dataset.   
+# On closer observation of the dataset and it was observed that features that were not included in the house were listed as NA hence these features will be handled by replacing them with "None".  
 
-unique(test$MiscFeature)
-test$MiscFeature[is.na(test$MiscFeature)] <- "None"
+new_DF <- test[rowSums(is.na(test)) >0,]
 
-unique(test$Alley)
-test$Alley[is.na(test$Alley)] <- "None"
+test%>%
+  filter(Neighborhood == "IDOTRR")%>%
+  group_by(Functional)%>%
+  count()%>%
+  ggplot(aes(x=Functional,
+             y = n))+
+  geom_bar(stat = "identity")
 
-unique(test$Fence)
-test$Fence[is.na(test$Fence)] <- "None"
-
-unique(test$FireplaceQu)
-test$FireplaceQu[is.na(test$FireplaceQu)] <- "None"
+test$Functional[is.na(test$Functional)] <- "Typ"
 
 
-unique(test$GarageQual)
-test$GarageQual[is.na(test$GarageQual)] <- "None"
+test%>%
+  filter(is.na(Exterior1st))%>%
+  group_by(Neighborhood)%>%
+  count()
+  
+test%>%
+  filter(Neighborhood == "Edwards")%>%
+  group_by(Exterior1st)%>%
+  count()%>%
+  ggplot(aes(x = reorder(Exterior1st,n),
+             y = n))+
+  geom_bar(stat = "identity",
+           position = "dodge")+
+  labs(x = "Exterior 1st",
+       y = "Count")+
+  coord_flip()
 
-unique(test$GarageType)
-test$GarageType[is.na(test$GarageType)] <- "None"
+test$Exterior1st[is.na(test$Exterior1st)] <- "Wd Sdng"
 
-unique(test$GarageFinish)
-test$GarageFinish[is.na(test$GarageFinish)] <- "None"
+test%>%
+  filter(is.na(Exterior2nd))%>%
+  group_by(Neighborhood)%>%
+  count()
 
-unique(test$GarageCond)
-test$GarageCond[is.na(test$GarageCond)] <- "None"
+test%>%
+  filter(Neighborhood == "Edwards")%>%
+  group_by(Exterior2nd)%>%
+  count()%>%
+  ggplot(aes(x = reorder(Exterior2nd,n),
+             y = n))+
+  geom_bar(stat = "identity",
+           position = "dodge")+
+  labs(x = "Exterior 1st",
+       y = "Count")+
+  coord_flip()
 
-unique(test$BsmtCond)
-test$BsmtCond[is.na(test$BsmtCond)] <- "None"
+test$Exterior2nd[is.na(test$Exterior2nd)] <- "Wd Sdng"
 
-unique(test$BsmtQual)
-test$BsmtQual[is.na(test$BsmtQual)] <- "None"
+ndf <- function(x){
+  mydf = data.frame()
+  y <- sapply(x,is.character)
+  y1 <- x[,y]
+  y2 <- x[,!y]
+  y1 <- replace(y1,is.na(y1),"No")
+  # y1 <- replace(y1, ,"No")
+  mydf <- cbind(y1,y2)
+  return(mydf)
+}
 
-unique(test$BsmtExposure)
-test$BsmtExposure[is.na(test$BsmtExposure)] <- "None"
+test <- ndf(test)
 
-unique(test$BsmtFinType1)
-test$BsmtFinType1[is.na(test$BsmtFinType1)] <- "None"
 
-unique(test$BsmtFinType2)
-test$BsmtFinType2[is.na(test$BsmtFinType2)] <- "None"
 
-unique(test$MasVnrType)
-test$MasVnrType[is.na(test$MasVnrType)] <- "None"
+test$TotalBsmtSF[is.na(test$TotalBsmtSF)] <- 0
+test$BsmtFinSF1[is.na(test$BsmtFinSF1)] <- 0
+test$BsmtFinSF2[is.na(test$BsmtFinSF2)] <- 0
+test$BsmtUnfSF[is.na(test$BsmtUnfSF)] <- 0
+test$BsmtFullBath[is.na(test$BsmtFullBath)] <- 0
+test$BsmtHalfBath[is.na(test$BsmtHalfBath)] <- 0
 
+
+# Lot frontage is the linear feet of street connected to the property, if NA it is subsituted by the mean of the lot frontage for that particular neighborhood. Similarly the year in which garage was built, has NA's those values were substituted with median year the garages where built for that particular neighborhood. 
 
 impute.mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
 impute.median <- function(x) replace(x,is.na(x), median(x,na.rm = TRUE))
+
+test%>%
+  filter(is.na(LotFrontage))%>%
+  group_by(Neighborhood)%>%
+  count()%>%
+  ggplot(aes(x = Neighborhood,
+             y = n))+
+  geom_bar(stat = "identity")+
+  coord_flip()
 
 test%>%
   group_by(Neighborhood)%>%
   mutate(LotFrontage = impute.mean(LotFrontage))->test
 
 test%>%
+  filter(is.na(GarageYrBlt))%>%
+  group_by(Neighborhood)%>%
+  count()%>%
+  ggplot(aes(x = Neighborhood,
+             y = n))+
+  geom_bar(stat = "identity")+
+  labs(x = "Count of NA",
+       title = "NA vs Neighborhoods for GarageYrBlt")+
+  coord_flip()
+
+test%>%
   group_by(Neighborhood)%>%
   mutate(GarageYrBlt = impute.median(GarageYrBlt))->test
 
-
-
+test%>%
+  group_by(Neighborhood)%>%
+  mutate(MasVnrArea = impute.median(MasVnrArea))->test
 
 test%>%
-  group_by(Neighborhood,MSZoning)%>%
-  summarise (n = n()) %>%
-  mutate(freq = n / sum(n))%>%
-  ggplot(aes(x = Neighborhood,
-             y = freq,
-             fill = freq))+
-  geom_bar(stat = "identity")+
-  labs(y = "Freq",
-       title = "Zoning of the neighborhoods")+
-  coord_flip()+
-  facet_wrap(~MSZoning)
+  filter(is.na(GarageArea))%>%
+  group_by(Neighborhood)%>%
+  count()
+
+test%>%
+  group_by(Neighborhood)%>%
+  mutate(GarageArea = impute.median(GarageArea))->test
+
+test%>%
+  group_by(Neighborhood)%>%
+  mutate(GarageCars = impute.median(GarageCars))->test
+
+# test%>%
+#   filter(BsmtCond == "No")
+# test1 <- as.data.frame(unclass(test))
+
+x1 <- data.frame(model.matrix(~PoolQC+
+                     MiscFeature+
+                     Alley+
+                     Fence+
+                     FireplaceQu+
+                     GarageQual+
+                     GarageType+
+                     GarageCond+
+                     GarageFinish+
+                     BsmtCond+
+                     BsmtQual+
+                     BsmtExposure+
+                     BsmtFinType2+
+                     BsmtFinType1+
+                     MasVnrType+
+                     Street+
+                     LotShape+
+                     LandContour+
+                     LotConfig+
+                     SaleCondition+
+                     SaleType+
+                     PavedDrive+
+                     Functional+
+                     KitchenQual+
+                     Electrical+
+                     CentralAir+
+                     HeatingQC+
+                     Heating+
+                     Foundation+
+                     ExterCond+
+                     ExterQual+
+                     MasVnrType+
+                     Exterior2nd+
+                     Exterior1st+
+                     RoofMatl+
+                     RoofStyle+
+                     HouseStyle+
+                     BldgType+
+                     Condition2+
+                     Condition1+
+                     Neighborhood+
+                     LandSlope+
+                     Utilities+
+                     MSZoning,test))
+
+
+
 
 
