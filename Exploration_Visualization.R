@@ -3,7 +3,7 @@ library(tidyverse)
 library(readr)
 
 test <- read_csv("test.csv")
-
+train <- read_csv("train.csv")
 # summary(test)
 
 
@@ -32,6 +32,7 @@ na_df%>%
 # On closer observation of the dataset and it was observed that features that were not included in the house were listed as NA hence these features will be handled by replacing them with "None".  
 
 new_DF <- test[rowSums(is.na(test)) >0,]
+
 
 test%>%
   filter(Neighborhood == "IDOTRR")%>%
@@ -123,6 +124,7 @@ test%>%
   group_by(Neighborhood)%>%
   mutate(LotFrontage = impute.mean(LotFrontage))->test
 
+
 test%>%
   filter(is.na(GarageYrBlt))%>%
   group_by(Neighborhood)%>%
@@ -154,57 +156,6 @@ test%>%
 test%>%
   group_by(Neighborhood)%>%
   mutate(GarageCars = impute.median(GarageCars))->test
-
-# test%>%
-#   filter(BsmtCond == "No")
-# test1 <- as.data.frame(unclass(test))
-
-x1 <- data.frame(model.matrix(~PoolQC+
-                     MiscFeature+
-                     Alley+
-                     Fence+
-                     FireplaceQu+
-                     GarageQual+
-                     GarageType+
-                     GarageCond+
-                     GarageFinish+
-                     BsmtCond+
-                     BsmtQual+
-                     BsmtExposure+
-                     BsmtFinType2+
-                     BsmtFinType1+
-                     MasVnrType+
-                     Street+
-                     LotShape+
-                     LandContour+
-                     LotConfig+
-                     SaleCondition+
-                     SaleType+
-                     PavedDrive+
-                     Functional+
-                     KitchenQual+
-                     Electrical+
-                     CentralAir+
-                     HeatingQC+
-                     Heating+
-                     Foundation+
-                     ExterCond+
-                     ExterQual+
-                     MasVnrType+
-                     Exterior2nd+
-                     Exterior1st+
-                     RoofMatl+
-                     RoofStyle+
-                     HouseStyle+
-                     BldgType+
-                     Condition2+
-                     Condition1+
-                     Neighborhood+
-                     LandSlope+
-                     Utilities+
-                     MSZoning,test))
-
-
 
 
 
