@@ -1,0 +1,235 @@
+---
+title: ""
+author:
+  -"Sumedh R. Sankhe"
+  -"Shivayogi Biradar"
+  -"Sharyu Deshmukh"
+  -"Mania Abdi"
+date: ""
+output: 
+  pdf_document:
+    fig_height: 3
+    fig_width: 5
+  html_document:
+    fig_height: 3
+    fig_width: 5
+  word_document:
+    fig_height: 3
+    fig_width: 5
+  header-includes:
+  toc: true
+  fig.caption: true
+---
+
+
+\centering
+\centerline{\includegraphics[height=2in]{C:/Users/Sumedh/Documents/Northeastern_University/DS5110_Data_Processing_Data_Management/nu.png}}
+
+#Northeastern University  
+####College of Computer and Information Science 
+####DS-5220 : Supervised Machine Learning and Learning Theory  
+####Spring 2017
+####Predicting House Prices using the Ames IA dataset
+
+
+
+\raggedright
+
+\clearpage
+
+
+\tableofcontents
+\newpage  
+```{r, setup, include=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(readr)
+library(knitr)
+
+knitr::opts_chunk$set(
+  tidy=FALSE,# display code as typed
+  warning = FALSE,#do not display any warning messages
+  message = FALSE,
+  size="small")   # slightly smaller font for code
+```
+
+#Introduction:
+
+\newpage
+#Methods:
+
+\newpage
+#Results:
+
+\newpage
+#References:
+
+\newpage
+#Appendix:
+
+```{r, warnings=FALSE}
+test <- read_csv("test.csv")
+train <- read_csv("train.csv")
+
+
+plot.na <- function(x){
+  na_count <- sapply(x, function(y) sum(length(which(is.na(y)))))
+  na_df <- data.frame(keyName = names(na_count),
+                      value = na_count, 
+                      row.names = NULL)
+  
+  #Visualizing the missing values
+  na_df%>%
+    arrange(desc(value))%>%
+    head(n=20)%>%
+    ggplot(aes(x = reorder(keyName,value),
+               y = value,
+               fill = value))+
+    labs(x = "Feature",
+         y = "Missing Count",
+         title = paste("Visualizing Missing Value Count",deparse(substitute(x)),"data"))+
+    geom_bar(stat = "identity")+
+    coord_flip()
+}
+
+
+plot.na(train)
+plot.na(test)
+```
+
+
+```{r}
+#Looking at each neighborhood and figuring out which neighborhood 
+test%>%
+  filter(Neighborhood == "IDOTRR")%>%
+  group_by(Neighborhood,Functional)%>%
+  count()%>%
+  ggplot(aes(x=Functional,
+             y = n))+
+  geom_bar(stat = "identity")
+
+test$Functional[is.na(test$Functional)] <- "Typ"
+
+test%>%
+  filter(Neighborhood == "Edwards")%>%
+  group_by(Exterior1st)%>%
+  count()%>%
+  ggplot(aes(x = reorder(Exterior1st,n),
+             y = n))+
+  geom_bar(stat = "identity",
+           position = "dodge")+
+  labs(x = "Exterior 1st",
+       y = "Count")+
+  coord_flip()
+
+test$Exterior1st[is.na(test$Exterior1st)] <- "Wd Sdng"
+
+test%>%
+  filter(Neighborhood == "Edwards")%>%
+  group_by(Exterior2nd)%>%
+  count()%>%
+  ggplot(aes(x = reorder(Exterior2nd,n),
+             y = n))+
+  geom_bar(stat = "identity",
+           position = "dodge")+
+  labs(x = "Exterior 1st",
+       y = "Count")+
+  coord_flip()
+test$Exterior2nd[is.na(test$Exterior2nd)] <- "Wd Sdng"
+
+#After going through the datasheet provided by the competition it was found that NA in the following columns depicted no basements hence 0 was substitued.
+test$TotalBsmtSF[is.na(test$TotalBsmtSF)] <- 0
+test$BsmtFinSF1[is.na(test$BsmtFinSF1)] <- 0
+test$BsmtFinSF2[is.na(test$BsmtFinSF2)] <- 0
+test$BsmtUnfSF[is.na(test$BsmtUnfSF)] <- 0
+test$BsmtFullBath[is.na(test$BsmtFullBath)] <- 0
+test$BsmtHalfBath[is.na(test$BsmtHalfBath)] <- 0
+
+```
+
+
+
+
+
+```{r}
+#' This function converts NA values of continuous variables to Mean
+impute.mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
+
+#' This function converts NA values of continuous variables to median
+impute.median <- function(x) replace(x,is.na(x), median(x,na.rm = TRUE))
+
+
+test%>%
+  filter(is.na(LotFrontage))%>%
+  group_by(Neighborhood)%>%
+  count()%>%
+  ggplot(aes(x = Neighborhood,
+             y = n))+
+  geom_bar(stat = "identity")+
+  coord_flip()
+
+test%>%
+  filter(is.na(GarageYrBlt))%>%
+  group_by(Neighborhood)%>%
+  count()%>%
+  ggplot(aes(x = Neighborhood,
+             y = n))+
+  geom_bar(stat = "identity")+
+  labs(x = "Count of NA",
+       title = "NA vs Neighborhoods for GarageYrBlt")+
+  coord_flip()
+
+test%>%
+  group_by(Neighborhood)%>%
+  mutate(LotFrontage = impute.mean(LotFrontage),
+         GarageYrBlt = impute.median(GarageYrBlt),
+         MasVnrArea = impute.median(MasVnrArea),
+         GarageCars = impute.median(GarageCars))->test
+
+train%>%
+  group_by(Neighborhood)%>%
+  mutate(LotFrontage = impute.mean(LotFrontage),
+         GarageYrBlt = impute.median(GarageYrBlt),
+         MasVnrArea = impute.median(MasVnrArea),
+         GarageCars = impute.median(GarageCars))-> train
+
+
+plot.na(test)
+```  
+
+
+```{r}
+#This function converts all columns of class character in a dataframe to a factor and fills NA and None with No
+convert.factor <- function(x){
+  char1 <- x[, sapply(x, class) == 'character']
+  not_char <- x[, sapply(x, class) != 'character']
+  char1 <- as.data.frame(
+  t(
+    apply(char1,1,function(y)ifelse(is.na(y),"No",ifelse(y=="None","No",y)))))
+  char1 <- as.data.frame(unclass(char1))
+  x <- cbind.data.frame(char1,not_char)
+  return(x)
+}
+
+
+#This function creates histograms for continuous data and barplots for categorical data
+dfplot <- function(df)
+{
+  ln <- length(names(df))
+  for(i in 1:ln){
+    mname <- substitute(df[,i])
+      if(class(df[,i])=="factor"){
+        plot(df[,i],
+             main=paste("Histogram of",colnames(df)[i]),
+             xlab = colnames(df)[i])}
+        else{hist(df[,i],
+                  main=paste("Histogram of",colnames(df)[i]),
+                  xlab = colnames(df)[i])}
+  }
+}
+
+```
+
+\newpage
+#Statement of Contributions:
+
