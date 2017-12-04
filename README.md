@@ -4,7 +4,6 @@
 Sumedh Sankhe  
 Sharyu Deshmukh  
 Shivayogi Biradar  
-Mania Abdi  
 
 ### Problem Description:  
 When a buyer is asked to describe their dream house, they probably would begin with the number of bedrooms, availability of white picket fence, number of floors etc. and not the height of basement ceiling or the proximity to a train station. From this project, we aim to prove that much more influences price negotiations than the features mentioned above.
